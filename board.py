@@ -61,3 +61,16 @@ class Board:
                 return True
             
         return False
+    
+
+    def dump_token(self, token, col):
+        """
+        Returns 0 if successful, -1 if column is full
+        """
+        for row in range(8):
+            if self.board[row][col] != 0:
+                if row != 7:
+                    self.board[row-1][col] = token
+                    return 0
+                else:
+                    return -1
