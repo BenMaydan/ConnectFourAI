@@ -1,19 +1,30 @@
 class Board:
 
+    MAX_NUMBER_OF_TURNS = 64
+
     def __init__(self):
+        self.turn = 0
+        self.token_dictionary = {1: "#", 2:"."}
+
         self.board = [[0 for _ in range(8)] for _ in range(8)]
 
 
-    def debug_board(self):
-        print_dictionary = {1: "#", 2:"."}
+    def player1_turn(self):
+        return self.turn % 2 == 0
 
+
+    def print_board(self):
         for row in self.board:
             for token in row:
-                if token in print_dictionary:
-                    print(print_dictionary[token] + " ", end="")
+                if token in self.token_dictionary:
+                    print(self.token_dictionary[token] + " ", end="")
                 else:
                     print("  ", end="")
             print()
+
+
+    def player_number(self):
+        return 1 if self.player1_turn() else 2
 
 
     def _check_four_in_a_row(array):
@@ -38,6 +49,9 @@ class Board:
 
     
     def is_game_over(self):
+        """
+        Returns -1 if nobody won, otherwise player token if player x won
+        """
         # check for horizontal win
         for row in self.board:
             if Board._check_four_in_a_row(row):
@@ -63,14 +77,15 @@ class Board:
         return False
     
 
-    def dump_token(self, token, col):
+    def drop_token(self, col):
         """
-        Returns 0 if successful, -1 if column is full
+        Returns True if successful, False if column is full
         """
-        for row in range(8):
-            if self.board[row][col] != 0:
-                if row != 7:
-                    self.board[row-1][col] = token
-                    return 0
-                else:
-                    return -1
+        for row in reversed(list(range(8))):
+            current_token = self.board[row][col]
+            if current_token == 0 or current_token == 0 and row == 7:
+                self.board[row][col] = self.player_number()
+                self.turn += 1
+                return True
+            elif row == 0:
+                return False

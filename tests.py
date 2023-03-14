@@ -1,6 +1,10 @@
 from board import Board
 
 
+def run_tests():
+    test_checkwin()
+
+
 def test_checkwin():
     arrays = [
         [1, 1, 1, 1, 0, 0, 0, 0],
