@@ -1,12 +1,14 @@
 class Board:
 
     MAX_NUMBER_OF_TURNS = 64
+    ROWS = 6
+    COLS = 7
 
     def __init__(self):
         self.turn = 0
         self.token_dictionary = {1: "#", 2:"."}
 
-        self.board = [[0 for _ in range(8)] for _ in range(8)]
+        self.board = [[0 for _ in range(Board.COLS)] for _ in range(Board.ROWS)]
 
 
     def player1_turn(self):
@@ -23,8 +25,8 @@ class Board:
             print()
 
 
-    def player_number(self):
-        return 1 if self.player1_turn() else 2
+    def player_number(self, number):
+        return 1 if number == 0 else 2
 
 
     def _check_four_in_a_row(array):
@@ -58,8 +60,8 @@ class Board:
                 return True
 
         # check for vertical win
-        for column in range(8):
-            if Board._check_four_in_a_row([self.board[row][column] for row in range(8)]):
+        for column in range(Board.COLS):
+            if Board._check_four_in_a_row([self.board[row][column] for row in range(Board.ROWS)]):
                 return True
 
         # check for diagonal win
@@ -81,11 +83,12 @@ class Board:
         """
         Returns True if successful, False if column is full
         """
-        for row in reversed(list(range(8))):
+        for row in reversed(list(range(Board.ROWS))):
             current_token = self.board[row][col]
-            if current_token == 0 or current_token == 0 and row == 7:
-                self.board[row][col] = self.player_number()
+            if current_token == 0:
+                self.board[row][col] = self.player_number(self.turn)
                 self.turn += 1
+                self.turn %= 2
                 return True
             elif row == 0:
                 return False
