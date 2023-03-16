@@ -6,7 +6,7 @@ class Board:
 
     def __init__(self):
         self.turn = 0
-        self.token_dictionary = {1: "#", 2:"."}
+        self.token_dictionary = {0: "Player 1", 1: "Player 2"}
 
         self.board = [[0 for _ in range(Board.COLS)] for _ in range(Board.ROWS)]
 
@@ -92,3 +92,8 @@ class Board:
                 return True
             elif row == 0:
                 return False
+            
+
+    @staticmethod
+    def compute_best_move(board, max_depth, current_depth, score, turn):
+        return 0

@@ -53,24 +53,29 @@ game_over = False
 while not game_over:
     
     if not board.player1_turn():
-        column = 0
-        # column = Board.compute_best_move(board)
+        column = Board.compute_best_move(board, 8, 0, 0, 1)
         board.drop_token(column)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
 
+        if event.type == pygame.MOUSEMOTION:
+            posx = event.pos[0]
+            xy = ((SQUARESIZE*(math.floor(posx/SQUARESIZE) + 0.5), int(SQUARESIZE/2)))
+            pygame.draw.rect(screen, BLACK, (0,0, WIDTH, SQUARESIZE))
+            if board.turn == 0:
+                pygame.draw.circle(screen, RED, xy, RADIUS)
+
         if event.type == pygame.MOUSEBUTTONDOWN and board.player1_turn():
             posx = event.pos[0]
-            posy = event.pos[1]
-            if posy > SQUARESIZE and posy < SIZE[1]:
-                column = int(math.floor(posx/SQUARESIZE))
-                success = board.drop_token(column)
-                if not success: continue
+            column = int(math.floor(posx/SQUARESIZE))
+            success = board.drop_token(column)
+            if not success: continue
 
     game_over = board.is_game_over()
     if game_over:
+        pygame.draw.rect(screen, BLACK, (0,0, WIDTH, SQUARESIZE))
         label = myfont.render("Player {} wins!".format(2-board.turn), 1, RED)
         screen.blit(label, (40,10))
         game_over = True
