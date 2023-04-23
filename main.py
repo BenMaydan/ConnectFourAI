@@ -1,18 +1,23 @@
 import pygame
+import os
 import sys
 import math
+import json
 
 from board import Board
 import tests
-
-pygame.init()
 
 
 # Run tests
 tests.run_tests()
 
 # initialize game
+pygame.init()
 board = Board()
+check_file = os.stat("table.json").st_size
+if check_file != 0:
+    with open("table.json", "r") as infile:
+        board.transposition_table = json.load(infile)
 
 
 SQUARESIZE = 100
@@ -36,9 +41,9 @@ def draw_board(board):
      
     for c in range(COLUMN_COUNT):
         for r in range(ROW_COUNT):      
-            if board.board[r][c] == 1:
+            if board.board[r][c] == 0:
                 pygame.draw.circle(screen, RED, (int(c*SQUARESIZE+SQUARESIZE/2), int(r*SQUARESIZE+SQUARESIZE*(3/2))), RADIUS)
-            elif board.board[r][c] == 2: 
+            elif board.board[r][c] == 1: 
                 pygame.draw.circle(screen, YELLOW, (int(c*SQUARESIZE+SQUARESIZE/2), int(r*SQUARESIZE+SQUARESIZE*(3/2))), RADIUS)
     pygame.display.update()
 
@@ -52,9 +57,11 @@ myfont = pygame.font.SysFont("monospace", 75)
 game_over = False
 while not game_over:
     
-    if not board.player1_turn():
-        column = Board.compute_best_move(board, 8, 0, 0, 1)
-        board.drop_token(column)
+    if not Board.player1_turn(board):
+        move = Board.minimax(board, 6, 1)
+        print("Column: {}, Score: {}".format(move[0], move[1]))
+        Board.drop_token(board, move[0])
+        Board.increment_turn(board)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -67,21 +74,35 @@ while not game_over:
             if board.turn == 0:
                 pygame.draw.circle(screen, RED, xy, RADIUS)
 
-        if event.type == pygame.MOUSEBUTTONDOWN and board.player1_turn():
+        if event.type == pygame.MOUSEBUTTONDOWN and Board.player1_turn(board):
             posx = event.pos[0]
             column = int(math.floor(posx/SQUARESIZE))
-            success = board.drop_token(column)
+            success = Board.drop_token(board, column)
+            Board.increment_turn(board)
             if not success: continue
 
-    game_over = board.is_game_over()
+    win = Board.game_over(board)
+    game_over = win[0]
     if game_over:
+        text = "Player {} wins!".format(win[1]+1)
+        if win[1] == -1:
+            text = "It's a draw!"
         pygame.draw.rect(screen, BLACK, (0,0, WIDTH, SQUARESIZE))
-        label = myfont.render("Player {} wins!".format(2-board.turn), 1, RED)
+        label = myfont.render(text, 1, RED)
         screen.blit(label, (40,10))
-        game_over = True
 
     draw_board(board)
     pygame.display.update()
 
     if game_over:
         pygame.time.wait(3000)
+
+
+pygame.quit()
+pygame.display.quit()
+
+
+# Resave the transposition table to use for next time
+table = board.transposition_table
+with open("table.json", "w") as outfile:
+    json.dump(table, outfile)
