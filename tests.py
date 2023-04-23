@@ -17,4 +17,4 @@ def test_checkwin():
     win = [True, False, False, True, True, False]
 
     for i in range(len(arrays)):
-        assert win[i] == Board.check_four_in_a_row(arrays[i])[0], "arrays[{}] is wrong".format(i)
+        assert win[i] == Board.check_in_a_row(arrays[i])[0], "arrays[{}] is wrong".format(i)

@@ -24,7 +24,7 @@ class Board:
 
 
     @staticmethod
-    def check_four_in_a_row(array):
+    def check_in_a_row(array, num_in_a_row=4):
         prev_color = array[0]
         counter = 0
 
@@ -37,7 +37,7 @@ class Board:
             else:
                 counter = 1
 
-            if counter == 4:
+            if counter == num_in_a_row:
                 return [True, prev_color]
             prev_color = color
 
@@ -55,13 +55,13 @@ class Board:
 
         # check for horizontal win
         for row in board:
-            win = Board.check_four_in_a_row(row)
+            win = Board.check_in_a_row(row)
             if win[0]:
                 return [True, win[1]]
 
         # check for vertical win
         for column in range(Board.COLS):
-            win = Board.check_four_in_a_row([board[row][column] for row in range(Board.ROWS)])
+            win = Board.check_in_a_row([board[row][column] for row in range(Board.ROWS)])
             if win[0]:
                 return [True, win[1]]
 
@@ -74,7 +74,7 @@ class Board:
         for diagonal in diagonals:
             if len(diagonal) < 4:
                 continue
-            win = Board.check_four_in_a_row(diagonal)
+            win = Board.check_in_a_row(diagonal)
             if win[0]:
                 return [True, win[1]]
             
@@ -103,20 +103,6 @@ class Board:
                 return True
             elif row == 0:
                 return False
-            
-
-    @staticmethod
-    def minimize(elem1: list, elem2: int, index: int) -> list:
-        if elem1[0] > elem2:
-            elem1 = [elem2, index]
-        return elem1
-    
-
-    @staticmethod
-    def maximize(elem1: list, elem2: int, index: int) -> list:
-        if elem1[0] < elem2:
-            elem1 = [elem2, index]
-        return elem1
             
 
     @staticmethod
@@ -154,7 +140,7 @@ class Board:
             if token == color:
                 return False
         return True
-
+    
 
     @staticmethod
     def heuristic(board, maximizing_player):
@@ -170,16 +156,31 @@ class Board:
         windows.extend(diagonals)
 
         score = 0
-        num_opportunities = 0
-        opportunity_cost = 1000
-        num_opportunities_cost = 100
+        threes = 10
+        twos = 3
+        one = 2
+        opponent_opportunity_cost = 1
         for window in windows:
             for four in Board.get_fours(window):
-                if len(four) != 4:
-                    print(len(four))
-                if Board.has_space(four, maximizing_player):
-                    score += opportunity_cost
-                    num_opportunities += 1
+                if Board.has_space(four, maximizing_player) or Board.has_space(four, (maximizing_player+1)%2):
+                    has_three = Board.check_in_a_row(four, 3)
+                    has_two = Board.check_in_a_row(four, 2)
+                    has_one = Board.check_in_a_row(four, 1)
+                    if has_three[0]:
+                        if has_three[1] == 1:
+                            score += threes
+                        else:
+                            score -= 3*opponent_opportunity_cost
+                    if has_two[0]:
+                        if has_two[1] == 1:
+                            score += twos
+                        else:
+                            score -= 2*opponent_opportunity_cost
+                    if has_one[0]:
+                        if has_one[1] == 1:
+                            score += one
+                        else:
+                            score -= opponent_opportunity_cost
         # score += num_opportunities * num_opportunities_cost
 
         return score
@@ -195,7 +196,7 @@ class Board:
 
 
     @staticmethod
-    def minimax(board, depth, maximizing_player) -> list:
+    def minimax(board, depth, alpha, beta, maximizing_player) -> list:
         """
         the return value is given by [column, value]
         """
@@ -225,11 +226,14 @@ class Board:
                 board_copy = Board.copy_board(board)
                 board_copy.turn = 1
                 if Board.drop_token(board_copy, col):
-                    new_score = Board.minimax(board_copy, depth-1, (maximizing_player+1)%2)
+                    new_score = Board.minimax(board_copy, depth-1, alpha, beta, (maximizing_player+1)%2)
                     # print(new_score)
                     if new_score[1] > value:
                         column = col
                         value = new_score[1]
+                alpha = max(alpha, value)
+                if alpha >= beta:
+                    break
             return column, value
         
         else:
@@ -241,9 +245,12 @@ class Board:
                 board_copy = Board.copy_board(board)
                 board_copy.turn = 0
                 if Board.drop_token(board_copy, col):
-                    new_score = Board.minimax(board_copy, depth-1, (maximizing_player+1)%2)
+                    new_score = Board.minimax(board_copy, depth-1, alpha, beta, (maximizing_player+1)%2)
                     # print(new_score)
                     if new_score[1] < value:
                         column = col
                         value = new_score[1]
+                beta = min(beta, value)
+                if alpha >= beta:
+                    break
             return column, value

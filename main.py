@@ -58,7 +58,7 @@ game_over = False
 while not game_over:
     
     if not Board.player1_turn(board):
-        move = Board.minimax(board, 6, 1)
+        move = Board.minimax(board, 7, -math.inf, math.inf, 1) # 3rd and 4th arguments: alpha, beta
         print("Column: {}, Score: {}".format(move[0], move[1]))
         Board.drop_token(board, move[0])
         Board.increment_turn(board)
