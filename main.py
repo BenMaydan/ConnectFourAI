@@ -3,9 +3,15 @@ import os
 import sys
 import math
 import json
+import argparse
 
 from board import Board
 import tests
+
+
+argument_parser = argparse.ArgumentParser("Parsing how many turns you want the computer to think ahead")
+argument_parser.add_argument("-t", "--turns", type=int, default=7, help="How many turns the computer thinks ahead. Recommended for speed and difficulty is 7")
+args = argument_parser.parse_args()
 
 
 # Run tests
@@ -58,7 +64,7 @@ game_over = False
 while not game_over:
     
     if not Board.player1_turn(board):
-        move = Board.minimax(board, 7, -math.inf, math.inf, 1) # 3rd and 4th arguments: alpha, beta
+        move = Board.minimax(board, args.turns, -math.inf, math.inf, 1) # 3rd and 4th arguments: alpha, beta
         print("Column: {}, Score: {}".format(move[0], move[1]))
         Board.drop_token(board, move[0])
         Board.increment_turn(board)
