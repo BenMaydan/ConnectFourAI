@@ -264,12 +264,11 @@ class Board:
                 board_copy = Board.copy_board(board)
                 board_copy.turn = 1
                 if Board.drop_token(board_copy, col):
-                    if Board.game_over(board_copy)[1] == 1:
-                        column = col
-                        value = math.inf
-                        break
+                    if not Board.game_over(board_copy)[1] == 1:
+                        new_score = Board.minimax(board_copy, depth-1, alpha, beta, (maximizing_player+1)%2)
+                    else:
+                        new_score = (None, math.inf)
 
-                    new_score = Board.minimax(board_copy, depth-1, alpha, beta, (maximizing_player+1)%2)
                     if new_score[1] > value:
                         column = col
                         value = new_score[1]
@@ -287,12 +286,11 @@ class Board:
                 board_copy = Board.copy_board(board)
                 board_copy.turn = 0
                 if Board.drop_token(board_copy, col):
-                    if Board.game_over(board_copy)[1] == 0:
-                        column = col
-                        value = -math.inf
-                        break
+                    if not Board.game_over(board_copy)[1] == 0:
+                        new_score = Board.minimax(board_copy, depth-1, alpha, beta, (maximizing_player+1)%2)
+                    else:
+                        new_score = (None, -math.inf)
                     
-                    new_score = Board.minimax(board_copy, depth-1, alpha, beta, (maximizing_player+1)%2)
                     if new_score[1] < value:
                         column = col
                         value = new_score[1]
