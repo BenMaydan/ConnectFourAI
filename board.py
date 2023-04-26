@@ -261,10 +261,14 @@ class Board:
             column = random.choice(cols)
 
             for col in cols:
-                # print(col)
                 board_copy = Board.copy_board(board)
                 board_copy.turn = 1
                 if Board.drop_token(board_copy, col):
+                    if Board.game_over(board_copy)[1] == 1:
+                        column = col
+                        value = math.inf
+                        break
+
                     new_score = Board.minimax(board_copy, depth-1, alpha, beta, (maximizing_player+1)%2)
                     if new_score[1] > value:
                         column = col
@@ -272,7 +276,7 @@ class Board:
                 alpha = max(alpha, value)
                 if alpha >= beta:
                     break
-            return column, value, depth
+            return column, value
         
         else:
             value = math.inf
@@ -283,6 +287,11 @@ class Board:
                 board_copy = Board.copy_board(board)
                 board_copy.turn = 0
                 if Board.drop_token(board_copy, col):
+                    if Board.game_over(board_copy)[1] == 0:
+                        column = col
+                        value = -math.inf
+                        break
+                    
                     new_score = Board.minimax(board_copy, depth-1, alpha, beta, (maximizing_player+1)%2)
                     if new_score[1] < value:
                         column = col
@@ -290,4 +299,4 @@ class Board:
                 beta = min(beta, value)
                 if alpha >= beta:
                     break
-            return column, value, depth
+            return column, value

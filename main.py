@@ -63,7 +63,7 @@ myfont = pygame.font.SysFont("monospace", 75)
 game_over = False
 while True: #not game_over
     
-    if not Board.player1_turn(board):
+    if not Board.player1_turn(board) and not game_over:
         depth = Board.optimal_depth(board, args.turns)
         move = Board.minimax(board, depth, -math.inf, math.inf, 1) # 3rd and 4th arguments: alpha, beta
         print("Column: {}, Score: {}".format(move[0], move[1]))
