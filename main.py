@@ -61,10 +61,11 @@ pygame.display.update()
 myfont = pygame.font.SysFont("monospace", 75)
 
 game_over = False
-while not game_over:
+while True: #not game_over
     
     if not Board.player1_turn(board):
-        move = Board.minimax(board, args.turns, -math.inf, math.inf, 1) # 3rd and 4th arguments: alpha, beta
+        depth = Board.optimal_depth(board, args.turns)
+        move = Board.minimax(board, depth, -math.inf, math.inf, 1) # 3rd and 4th arguments: alpha, beta
         print("Column: {}, Score: {}".format(move[0], move[1]))
         Board.drop_token(board, move[0])
         Board.increment_turn(board)
@@ -100,8 +101,8 @@ while not game_over:
     draw_board(board)
     pygame.display.update()
 
-    if game_over:
-        pygame.time.wait(3000)
+    # if game_over:
+    #     pygame.time.wait(3000)
 
 
 pygame.quit()

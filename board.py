@@ -143,6 +143,23 @@ class Board:
     
 
     @staticmethod
+    def heuristic_four_score(four, num_tokens):
+        """
+        We already checked there is only one opponent's tokens in here, so we just need to count how many there are and check that == num_tokens
+        """
+        num = 0
+        token_type = -1
+        for token in four:
+            if token != -1:
+                token_type = token
+                num += 1
+        
+        if num == num_tokens:
+            return token_type
+        return -1
+    
+
+    @staticmethod
     def heuristic(board, maximizing_player):
         # if maximizing_player is 1, then a good board is where player 2 has good chances
         windows = board
@@ -157,33 +174,55 @@ class Board:
 
         score = 0
         threes = 10
-        twos = 3
-        one = 2
+        twos = 5
+        one = 1
         opponent_opportunity_cost = 1
         for window in windows:
             for four in Board.get_fours(window):
                 if Board.has_space(four, maximizing_player) or Board.has_space(four, (maximizing_player+1)%2):
-                    has_three = Board.check_in_a_row(four, 3)
-                    has_two = Board.check_in_a_row(four, 2)
-                    has_one = Board.check_in_a_row(four, 1)
-                    if has_three[0]:
-                        if has_three[1] == 1:
+                    three_token_type = Board.heuristic_four_score(four, 3)
+                    two_token_type = Board.heuristic_four_score(four, 2)
+                    one_token_type = Board.heuristic_four_score(four, 1)
+                    if three_token_type != -1:
+                        if three_token_type == 1:
                             score += threes
-                        else:
+                        elif three_token_type == 0:
                             score -= 3*opponent_opportunity_cost
-                    if has_two[0]:
-                        if has_two[1] == 1:
+                        continue
+                    if two_token_type != -1:
+                        if two_token_type == 1:
                             score += twos
-                        else:
+                        elif two_token_type == 0:
                             score -= 2*opponent_opportunity_cost
-                    if has_one[0]:
-                        if has_one[1] == 1:
+                        continue
+                    if one_token_type != -1:
+                        if one_token_type == 1:
                             score += one
-                        else:
+                        elif one_token_type == 0:
                             score -= opponent_opportunity_cost
+                        continue
         # score += num_opportunities * num_opportunities_cost
 
         return score
+    
+
+    @staticmethod
+    def optimal_depth(board, original_depth):
+        num_valid_cols = len(Board.valid_cols(board))
+        original_num_states = 7**original_depth
+        if num_valid_cols == 1:
+            return 6
+        if num_valid_cols**original_depth < original_num_states:
+            # num_valid^new_depth = 7^original_depth
+            # new_depth = log_(num_valid) (7**original_depth)
+            return int(math.log(original_num_states) / math.log(num_valid_cols))
+        return original_depth
+    
+
+    @staticmethod
+    def shuffle(valid):
+        random.shuffle(valid)
+        return valid
     
 
     @staticmethod
@@ -218,10 +257,10 @@ class Board:
 
         if maximizing_player:
             value = -math.inf
-            valid = Board.valid_cols(board)
-            column = random.choice(valid)
+            cols = Board.shuffle(Board.valid_cols(board))
+            column = random.choice(cols)
 
-            for col in Board.valid_cols(board):
+            for col in cols:
                 # print(col)
                 board_copy = Board.copy_board(board)
                 board_copy.turn = 1
@@ -238,9 +277,10 @@ class Board:
         
         else:
             value = math.inf
-            column = None
+            cols = Board.shuffle(Board.valid_cols(board))
+            column = random.choice(cols)
 
-            for col in Board.valid_cols(board):
+            for col in cols:
                 # print(col)
                 board_copy = Board.copy_board(board)
                 board_copy.turn = 0
