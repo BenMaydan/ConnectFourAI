@@ -81,7 +81,7 @@ class Board:
         if Board.board_is_full(board_obj):
             return [True, -1]
 
-        return [False, None, None]
+        return [False, None]
     
 
     
@@ -266,14 +266,13 @@ class Board:
                 board_copy.turn = 1
                 if Board.drop_token(board_copy, col):
                     new_score = Board.minimax(board_copy, depth-1, alpha, beta, (maximizing_player+1)%2)
-                    # print(new_score)
                     if new_score[1] > value:
                         column = col
                         value = new_score[1]
                 alpha = max(alpha, value)
                 if alpha >= beta:
                     break
-            return column, value
+            return column, value, depth
         
         else:
             value = math.inf
@@ -281,16 +280,14 @@ class Board:
             column = random.choice(cols)
 
             for col in cols:
-                # print(col)
                 board_copy = Board.copy_board(board)
                 board_copy.turn = 0
                 if Board.drop_token(board_copy, col):
                     new_score = Board.minimax(board_copy, depth-1, alpha, beta, (maximizing_player+1)%2)
-                    # print(new_score)
                     if new_score[1] < value:
                         column = col
                         value = new_score[1]
                 beta = min(beta, value)
                 if alpha >= beta:
                     break
-            return column, value
+            return column, value, depth
