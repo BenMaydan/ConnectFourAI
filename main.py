@@ -20,11 +20,6 @@ tests.run_tests()
 # initialize game
 pygame.init()
 board = Board()
-check_file = os.stat("table.json").st_size
-if check_file != 0:
-    with open("table.json", "r") as infile:
-        board.transposition_table = json.load(infile)
-
 
 SQUARESIZE = 100
 ROW_COUNT = 6
